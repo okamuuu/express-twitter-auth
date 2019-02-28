@@ -13,7 +13,6 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 
-// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
@@ -30,14 +29,14 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// passport-twitterの設定
 passport.use(new TwitterStrategy({
     consumerKey: config.CLIENT_ID,
     consumerSecret: config.CLIENT_SECRET,
     callbackURL: "http://localhost:3000/auth/twitter/callback"
   },
-  // 認証後の処理
   function(token, tokenSecret, profile, done) {
+    // token, tokenSecret があれば Firebase にログインすることができるはず？
+    console.log(token, tokenSecret)
     return done(null, profile);
   }
 ));
@@ -49,7 +48,6 @@ passport.deserializeUser(function(user, done) {
   done(null, user);
 });
 
-
 app.use('/', indexRouter);
 app.use('/user', usersRouter);
 app.get('/auth/twitter', passport.authenticate('twitter'));
@@ -59,16 +57,10 @@ app.get('/auth/twitter/callback',
     res.redirect('/user');
   });
 
-
-
-
-// catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
-// error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
   // render the error page
